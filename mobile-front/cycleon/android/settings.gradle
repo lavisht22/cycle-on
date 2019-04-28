@@ -1,0 +1,3 @@
+rootProject.name = 'cycleon'
+
+include ':app'
