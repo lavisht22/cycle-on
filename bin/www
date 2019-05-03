@@ -4,22 +4,38 @@
  * Module dependencies.
  */
 
-var app = require('../app');
-var debug = require('debug')('cycle-on:server');
-var http = require('http');
+const app = require('../app');
+const debug = require('debug')('cycle-on:server');
+const http = require('http');
+const WebSocket = require('ws');
 
 /**
  * Get port from environment and store in Express.
  */
 
-var port = normalizePort(process.env.PORT || '3000');
+const port = normalizePort(process.env.PORT || '3000');
 app.set('port', port);
 
 /**
  * Create HTTP server.
  */
 
-var server = http.createServer(app);
+const server = http.createServer(app);
+
+// initialize the WebSocket server instance
+const wss = new WebSocket.Server({ server });
+
+wss.on('connection', ws => {
+  // connection is up, let's add a simple simple event
+  ws.on('message', message => {
+    // log the received message and send it back to the client
+    console.log('received: %s', message);
+    ws.send(`Hello, you sent -> ${message}`);
+  });
+
+  // send immediatly a feedback to the incoming connection
+  ws.send('Hi there, I am a WebSocket server');
+});
 
 /**
  * Listen on provided port, on all network interfaces.
@@ -34,7 +50,7 @@ server.on('listening', onListening);
  */
 
 function normalizePort(val) {
-  var port = parseInt(val, 10);
+  const port = parseInt(val, 10);
 
   if (isNaN(port)) {
     // named pipe
@@ -58,9 +74,7 @@ function onError(error) {
     throw error;
   }
 
-  var bind = typeof port === 'string'
-    ? 'Pipe ' + port
-    : 'Port ' + port;
+  const bind = typeof port === 'string' ? 'Pipe ' + port : 'Port ' + port;
 
   // handle specific listen errors with friendly messages
   switch (error.code) {
@@ -82,9 +96,7 @@ function onError(error) {
  */
 
 function onListening() {
-  var addr = server.address();
-  var bind = typeof addr === 'string'
-    ? 'pipe ' + addr
-    : 'port ' + addr.port;
+  const addr = server.address();
+  const bind = typeof addr === 'string' ? 'pipe ' + addr : 'port ' + addr.port;
   debug('Listening on ' + bind);
 }
