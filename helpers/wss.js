@@ -32,8 +32,6 @@ const createWebSocketServer = server => {
         }
       }
     });
-
-    ws.send('Welcome to Cycle-ON');
   });
 };
 
