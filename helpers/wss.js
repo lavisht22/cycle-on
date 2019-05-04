@@ -31,6 +31,32 @@ const createWebSocketServer = server => {
           ws.send('Error! Unable to process settings on server.');
         }
       }
+
+      if (commandType === 'update') {
+        try {
+          await redisHelper.setKey(`${cycleId}_long`, long);
+          await redisHelper.setKey(`${cycleId}_lat`, lat);
+          const cycleStatus = await redisHelper.getKey(`${cycleId}_status`);
+          const cycleLockStatus = await redisHelper.getKey(`${cycleId}_lock`);
+
+          if (cycleStatus === CYCLE_STATUS.AVAILABLE && lockStatus === LOCK_STATUS.LOCKED) {
+            ws.send('111');
+          } else if (
+            cycleStatus === CYCLE_STATUS.AVAILABLE &&
+            lockStatus === LOCK_STATUS.UNLOCKED
+          ) {
+            ws.send('110');
+          } else if (cycleStatus === CYCLE_STATUS.BOOKED && lockStatus === LOCK_STATUS.LOCKED) {
+            ws.send('101');
+          } else if (cycleStatus === CYCLE_STATUS.BOOKED && lockStatus === LOCK_STATUS.UNLOCKED) {
+            ws.send('100');
+          } else {
+            ws.send('000');
+          }
+        } catch (error) {
+          ws.send('Error! Unable to process settings on server.');
+        }
+      }
     });
   });
 };
