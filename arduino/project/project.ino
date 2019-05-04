@@ -12,6 +12,7 @@
 
 #include <TinyGsmClient.h>
 #include <ArduinoHttpClient.h>
+#include "Timer.h"
 
 // Uncomment this if you want to see all AT commands
 //#define DUMP_AT_COMMANDS
@@ -27,6 +28,8 @@ SoftwareSerial SerialAT(8, 7); // RX, TX
 #define GSM_AUTOBAUD_MIN 9600
 #define GSM_AUTOBAUD_MAX 38400
 
+// Timer
+Timer t;
 
 // Your GPRS credentials
 // Leave empty, if missing user or pass
@@ -88,11 +91,13 @@ void setup() {
     return;
   }
   SerialMon.println(" OK");
+
+  SerialMon.println("Starting WebSocket client");
+  wsclient.begin();
 }
 
 void loop() {
-  SerialMon.println("Starting WebSocket client");
-  wsclient.begin();
+
 
   while (client.connected()) {
     SerialMon.print("Sending hello ");
@@ -120,4 +125,24 @@ void loop() {
   }
 
   SerialMon.println("disconnected");
+}
+
+void registerCycle() {
+  wsclient.beginMessage(TYPE_TEXT);
+  wsclient.print("reg ");
+  wsclient.print("test ");
+  wsclient.print("213.31823 ");
+  wsclient.print("127.31823 ");
+  wsclient.print("true ");
+  wsclient.endMessage();
+}
+
+void updateData() {
+  wsclient.beginMessage(TYPE_TEXT);
+  wsclient.print("update ");
+  wsclient.print("test ");
+  wsclient.print("213.31823 ");
+  wsclient.print("127.31823 ");
+  wsclient.print("true ");
+  wsclient.endMessage();
 }

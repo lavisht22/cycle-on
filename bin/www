@@ -1,13 +1,15 @@
-#!/usr/bin/env node
+/* eslint-disable no-restricted-globals */
+/* eslint-disable no-console */
+/* eslint-disable no-use-before-define */
 
 /**
  * Module dependencies.
  */
-
-const app = require('../app');
 const debug = require('debug')('cycle-on:server');
 const http = require('http');
-const WebSocket = require('ws');
+const { createWebSocketServer } = require('../helpers/wss');
+
+const app = require('../app');
 
 /**
  * Get port from environment and store in Express.
@@ -22,20 +24,7 @@ app.set('port', port);
 
 const server = http.createServer(app);
 
-// initialize the WebSocket server instance
-const wss = new WebSocket.Server({ server });
-
-wss.on('connection', ws => {
-  // connection is up, let's add a simple simple event
-  ws.on('message', message => {
-    // log the received message and send it back to the client
-    console.log('received: %s', message);
-    ws.send(`Hello, you sent -> ${message}`);
-  });
-
-  // send immediatly a feedback to the incoming connection
-  ws.send('Hi there, I am a WebSocket server');
-});
+createWebSocketServer(server);
 
 /**
  * Listen on provided port, on all network interfaces.
@@ -79,11 +68,11 @@ function onError(error) {
   // handle specific listen errors with friendly messages
   switch (error.code) {
     case 'EACCES':
-      console.error(bind + ' requires elevated privileges');
+      console.error(`${bind} requires elevated privileges`);
       process.exit(1);
       break;
     case 'EADDRINUSE':
-      console.error(bind + ' is already in use');
+      console.error(`${bind} is already in use`);
       process.exit(1);
       break;
     default:
@@ -97,6 +86,6 @@ function onError(error) {
 
 function onListening() {
   const addr = server.address();
-  const bind = typeof addr === 'string' ? 'pipe ' + addr : 'port ' + addr.port;
-  debug('Listening on ' + bind);
+  const bind = typeof addr === 'string' ? `pipe ${addr}` : `port ${addr.port}`;
+  debug(`Listening on ${bind}`);
 }
