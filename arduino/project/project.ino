@@ -94,6 +94,7 @@ void setup() {
 
   SerialMon.println("Starting WebSocket client");
   wsclient.begin();
+  registerCycle();
 }
 
 void loop() {
@@ -135,6 +136,7 @@ void registerCycle() {
   wsclient.print("127.31823 ");
   wsclient.print("true ");
   wsclient.endMessage();
+  
 }
 
 void updateData() {
