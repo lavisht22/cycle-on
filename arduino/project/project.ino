@@ -9,7 +9,7 @@
 
 // Increase RX buffer if needed
 //#define TINY_GSM_RX_BUFFER 512
-
+//#include <TinyGPS++.h>
 #include <TinyGsmClient.h>
 #include <ArduinoHttpClient.h>
 #include "Timer.h"
@@ -22,6 +22,11 @@
 
 #include <SoftwareSerial.h>
 SoftwareSerial SerialAT(8, 7); // RX, TX
+
+// initialize GPS
+//static const uint32_t GPSBaud = 9600 ;
+//TinyGPSPlus gps;
+//SoftwareSerial ss(3, 4);
 
 #define TINY_GSM_DEBUG SerialMon
 
@@ -52,6 +57,8 @@ TinyGsm modem(SerialAT);
 TinyGsmClient client(modem);
 WebSocketClient wsclient = WebSocketClient(client, serverAddress, port);
 int count = 0;
+
+bool locked;
 
 void setup() {
   // Set console baud rate
@@ -95,40 +102,56 @@ void setup() {
   SerialMon.println("Starting WebSocket client");
   wsclient.begin();
   registerCycle();
-}
 
-void loop() {
-
-
-  while (client.connected()) {
-    SerialMon.print("Sending hello ");
-    SerialMon.println(count);
-
-    // send a hello #
-    wsclient.beginMessage(TYPE_TEXT);
-    wsclient.print("hello ");
-    wsclient.print(count);
-    wsclient.endMessage();
-
-    // increment count for next message
-    count++;
-
-    // check if a message is available to be received
+  while(client.connected()){
     int messageSize = wsclient.parseMessage();
 
     if (messageSize > 0) {
-      SerialMon.println("Received a message:");
-      SerialMon.println(wsclient.readString());
+      String response = wsclient.readString();
+      if(response != "Data Saved!") {
+        SerialMon.print("Unable to Register Cycle");
+        return;
+      } else {
+        break;
+      }
     }
-
-    // wait 5 seconds
-    delay(5000);
   }
 
-  SerialMon.println("disconnected");
+  t.every(5000, updateData, 0);
+}
+
+void loop() {
+  t.update();
+//  while (client.connected()) {
+//    SerialMon.print("Sending hello ");
+//    SerialMon.println(count);
+//
+//    // send a hello #
+//    wsclient.beginMessage(TYPE_TEXT);
+//    wsclient.print("hello ");
+//    wsclient.print(count);
+//    wsclient.endMessage();
+//
+//    // increment count for next message
+//    count++;
+//
+//    // check if a message is available to be received
+//    int messageSize = wsclient.parseMessage();
+//
+//    if (messageSize > 0) {
+//      SerialMon.println("Received a message:");
+//      SerialMon.println(wsclient.readString());
+//    }
+//
+//    // wait 5 seconds
+//    delay(5000);
+//  }
+//
+//  SerialMon.println("disconnected");
 }
 
 void registerCycle() {
+  SerialMon.println("Registering Cycle for the first time!");
   wsclient.beginMessage(TYPE_TEXT);
   wsclient.print("reg ");
   wsclient.print("test ");
@@ -140,6 +163,7 @@ void registerCycle() {
 }
 
 void updateData() {
+  SerialMon.println("Updating Cycle Data");
   wsclient.beginMessage(TYPE_TEXT);
   wsclient.print("update ");
   wsclient.print("test ");
@@ -147,4 +171,34 @@ void updateData() {
   wsclient.print("127.31823 ");
   wsclient.print("true ");
   wsclient.endMessage();
+
+  
+  while(client.connected()){
+    int messageSize = wsclient.parseMessage();
+
+    if (messageSize > 0) {
+      String response = wsclient.readString();
+      SerialMon.print("Response: ");
+      SerialMon.println(response);
+      int i_response = response.toInt();
+      switch(i_response) {
+        case 111:
+        locked = true;
+        break;
+        case 110:
+        locked = false;
+        break;
+        case 101:
+        locked = true;
+        break;
+        case 100:
+        locked = false;
+        break;
+        default:
+        locked = true;
+        break;
+      }
+      break;
+    }
+  }
 }

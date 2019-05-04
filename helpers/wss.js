@@ -39,16 +39,22 @@ const createWebSocketServer = server => {
           const cycleStatus = await redisHelper.getKey(`${cycleId}_status`);
           const cycleLockStatus = await redisHelper.getKey(`${cycleId}_lock`);
 
-          if (cycleStatus === CYCLE_STATUS.AVAILABLE && lockStatus === LOCK_STATUS.LOCKED) {
+          if (cycleStatus === CYCLE_STATUS.AVAILABLE && cycleLockStatus === LOCK_STATUS.LOCKED) {
             ws.send('111');
           } else if (
             cycleStatus === CYCLE_STATUS.AVAILABLE &&
-            lockStatus === LOCK_STATUS.UNLOCKED
+            cycleLockStatus === LOCK_STATUS.UNLOCKED
           ) {
             ws.send('110');
-          } else if (cycleStatus === CYCLE_STATUS.BOOKED && lockStatus === LOCK_STATUS.LOCKED) {
+          } else if (
+            cycleStatus === CYCLE_STATUS.BOOKED &&
+            cycleLockStatus === LOCK_STATUS.LOCKED
+          ) {
             ws.send('101');
-          } else if (cycleStatus === CYCLE_STATUS.BOOKED && lockStatus === LOCK_STATUS.UNLOCKED) {
+          } else if (
+            cycleStatus === CYCLE_STATUS.BOOKED &&
+            cycleLockStatus === LOCK_STATUS.UNLOCKED
+          ) {
             ws.send('100');
           } else {
             ws.send('000');
