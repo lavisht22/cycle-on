@@ -58,9 +58,19 @@ TinyGsmClient client(modem);
 WebSocketClient wsclient = WebSocketClient(client, serverAddress, port);
 int count = 0;
 
-bool locked;
+bool prevLocked;
+
+#include <Servo.h>
+Servo myservo;
+int motorPin = 3;
+int pos = 0;
+
+String cycleId = "test ";
 
 void setup() {
+  prevLocked = true;
+  myservo.attach(motorPin);
+  myservo.write(180);
   // Set console baud rate
   SerialMon.begin(9600);
   delay(10);
@@ -122,39 +132,13 @@ void setup() {
 
 void loop() {
   t.update();
-//  while (client.connected()) {
-//    SerialMon.print("Sending hello ");
-//    SerialMon.println(count);
-//
-//    // send a hello #
-//    wsclient.beginMessage(TYPE_TEXT);
-//    wsclient.print("hello ");
-//    wsclient.print(count);
-//    wsclient.endMessage();
-//
-//    // increment count for next message
-//    count++;
-//
-//    // check if a message is available to be received
-//    int messageSize = wsclient.parseMessage();
-//
-//    if (messageSize > 0) {
-//      SerialMon.println("Received a message:");
-//      SerialMon.println(wsclient.readString());
-//    }
-//
-//    // wait 5 seconds
-//    delay(5000);
-//  }
-//
-//  SerialMon.println("disconnected");
 }
 
 void registerCycle() {
-  SerialMon.println("Registering Cycle for the first time!");
+  SerialMon.println("Reg");
   wsclient.beginMessage(TYPE_TEXT);
   wsclient.print("reg ");
-  wsclient.print("test ");
+  wsclient.print(cycleId);
   wsclient.print("213.31823 ");
   wsclient.print("127.31823 ");
   wsclient.print("true ");
@@ -163,10 +147,12 @@ void registerCycle() {
 }
 
 void updateData() {
-  SerialMon.println("Updating Cycle Data");
+  bool locked;
+  
+  SerialMon.println("Updt");
   wsclient.beginMessage(TYPE_TEXT);
   wsclient.print("update ");
-  wsclient.print("test ");
+  wsclient.print(cycleId);
   wsclient.print("213.31823 ");
   wsclient.print("127.31823 ");
   wsclient.print("true ");
@@ -178,7 +164,7 @@ void updateData() {
 
     if (messageSize > 0) {
       String response = wsclient.readString();
-      SerialMon.print("Response: ");
+      SerialMon.print("R:");
       SerialMon.println(response);
       int i_response = response.toInt();
       switch(i_response) {
@@ -200,5 +186,29 @@ void updateData() {
       }
       break;
     }
+  }
+
+  if(!prevLocked && locked == true){
+    lockMotor();
+  }
+
+  if(prevLocked && locked == false){
+    unlockMotor();
+  }
+
+  prevLocked = locked;
+}
+
+void lockMotor() {
+  for (pos = 0; pos <= 180; pos += 1) { 
+    myservo.write(pos);
+    delay(15);
+  }
+}
+
+void unlockMotor() {
+  for (pos = 180; pos >= 0; pos -= 1) { 
+    myservo.write(pos);
+    delay(15);
   }
 }
