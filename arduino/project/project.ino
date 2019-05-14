@@ -64,7 +64,7 @@ Servo myservo;
 int motorPin = 3;
 int pos = 0;
 
-String cycleId = "test ";
+String cycleId = "test";
 
 void setup() {
   prevLocked = true;
