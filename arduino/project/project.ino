@@ -141,7 +141,7 @@ void registerCycle() {
   SerialMon.println("Reg");
   wsclient.beginMessage(TYPE_TEXT);
   wsclient.print("reg ");
-  wsclient.print(cycleId);
+  wsclient.print(cycleId + " ");
   wsclient.print(latitude + " ");
   wsclient.print(longitude + " ");
   wsclient.print("true ");
