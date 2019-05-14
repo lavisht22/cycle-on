@@ -16,8 +16,8 @@ const createWebSocketServer = server => {
       }
       const commandType = data[0];
       const cycleId = data[1];
-      const long = data[2];
-      const lat = data[4];
+      const lat = data[2];
+      const long = data[4];
       const lockStatus = data[5];
 
       if (commandType === 'reg') {

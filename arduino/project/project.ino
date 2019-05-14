@@ -9,7 +9,7 @@
 
 // Increase RX buffer if needed
 //#define TINY_GSM_RX_BUFFER 512
-//#include <TinyGPS++.h>
+#include <TinyGPS++.h>
 #include <TinyGsmClient.h>
 #include <ArduinoHttpClient.h>
 #include "Timer.h"
@@ -20,13 +20,12 @@
 // Set serial for debug console (to the Serial Monitor, default speed 115200)
 #define SerialMon Serial
 
-#include <SoftwareSerial.h>
-SoftwareSerial SerialAT(8, 7); // RX, TX
+#define SerialAT Serial1
 
 // initialize GPS
-//static const uint32_t GPSBaud = 9600 ;
-//TinyGPSPlus gps;
-//SoftwareSerial ss(3, 4);
+static const uint32_t GPSBaud = 9600 ;
+TinyGPSPlus gps;
+#define ss Serial2
 
 #define TINY_GSM_DEBUG SerialMon
 
@@ -38,7 +37,7 @@ Timer t;
 
 // Your GPRS credentials
 // Leave empty, if missing user or pass
-const char apn[]  = "www";
+const char apn[]  = "airtelgprs.com";
 const char user[] = "";
 const char pass[] = "";
 
@@ -74,6 +73,7 @@ void setup() {
   // Set console baud rate
   SerialMon.begin(9600);
   delay(10);
+  ss.begin(GPSBaud);
 
   // Set GSM module baud rate
   TinyGsmAutoBaud(SerialAT,GSM_AUTOBAUD_MIN,GSM_AUTOBAUD_MAX);
@@ -135,26 +135,32 @@ void loop() {
 }
 
 void registerCycle() {
+  String latitude = String(gps.location.lat(), 6);
+  String longitude = String(gps.location.lng(), 6); 
+  
   SerialMon.println("Reg");
   wsclient.beginMessage(TYPE_TEXT);
   wsclient.print("reg ");
   wsclient.print(cycleId);
-  wsclient.print("213.31823 ");
-  wsclient.print("127.31823 ");
+  wsclient.print(latitude + " ");
+  wsclient.print(longitude + " ");
   wsclient.print("true ");
   wsclient.endMessage();
   
 }
 
 void updateData() {
+  String latitude = String(gps.location.lat(), 6);
+  String longitude = String(gps.location.lng(), 6);
+  
   bool locked;
   
-  SerialMon.println("Updt");
+  SerialMon.println("Update");
   wsclient.beginMessage(TYPE_TEXT);
   wsclient.print("update ");
-  wsclient.print(cycleId);
-  wsclient.print("213.31823 ");
-  wsclient.print("127.31823 ");
+  wsclient.print(cycleId + " ");
+  wsclient.print(latitude + " ");
+  wsclient.print(longitude + " ");
   wsclient.print("true ");
   wsclient.endMessage();
 
@@ -202,13 +208,13 @@ void updateData() {
 void lockMotor() {
   for (pos = 0; pos <= 180; pos += 1) { 
     myservo.write(pos);
-    delay(15);
+    delay(5);
   }
 }
 
 void unlockMotor() {
   for (pos = 180; pos >= 0; pos -= 1) { 
     myservo.write(pos);
-    delay(15);
+    delay(5);
   }
 }
