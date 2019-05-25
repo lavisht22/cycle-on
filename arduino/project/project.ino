@@ -37,7 +37,7 @@ Timer t;
 
 // Your GPRS credentials
 // Leave empty, if missing user or pass
-const char apn[]  = "airtelgprs.com";
+const char apn[]  = "www";
 const char user[] = "";
 const char pass[] = "";
 
@@ -69,7 +69,7 @@ String cycleId = "test";
 void setup() {
   prevLocked = true;
   myservo.attach(motorPin);
-  myservo.write(180);
+  myservo.write(50);
   // Set console baud rate
   SerialMon.begin(9600);
   delay(10);
@@ -206,15 +206,9 @@ void updateData() {
 }
 
 void lockMotor() {
-  for (pos = 0; pos <= 180; pos += 1) { 
-    myservo.write(pos);
-    delay(5);
-  }
+  myservo.write(50);
 }
 
 void unlockMotor() {
-  for (pos = 180; pos >= 0; pos -= 1) { 
-    myservo.write(pos);
-    delay(5);
-  }
+  myservo.write(100);
 }
