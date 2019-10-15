@@ -9,8 +9,9 @@ module.exports = new Schema({
   },
   phone: {
     type: String,
+    unique: [true, 'User already exists'],
     validate: {
-      validator(v) {
+      validator: v => {
         return /[6-9]\d{9}/.test(v);
       },
       message: props => `${props.value} is not a valid phone number!`

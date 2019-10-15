@@ -1,4 +1,3 @@
-//TODO: Improve structure for redis
 //TODO: Include trips logic into cycle
 
 const WebSocket = require('ws');
@@ -21,7 +20,7 @@ const createWebSocketServer = server => {
       const cycleId = data[1];
       const lat = data[2];
       const long = data[3];
-      const lockStatus = data[4];
+      // const lockStatus = data[4];
 
       if (commandType === 'reg') {
         try {
