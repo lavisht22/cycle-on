@@ -1,3 +1,6 @@
+//TODO: Improve structure for redis
+//TODO: Include trips logic into cycle
+
 const WebSocket = require('ws');
 
 const { CYCLE_STATUS, LOCK_STATUS } = require('../helpers/constants');

@@ -26,3 +26,6 @@ npm-debug.log
 
 # yarn lock file
 yarn.lock
+
+#VSCode
+*.vscode
