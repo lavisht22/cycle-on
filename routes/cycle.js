@@ -1,68 +1,45 @@
-//TODO: Delete Unused routes
-//TODO: Create route for cycle lookup
-
 const express = require('express');
-const redisHelper = require('../helpers/redis');
-const { CYCLE_STATUS, LOCK_STATUS } = require('../helpers/constants');
+const { CYCLE_STATUS } = require('../helpers/constants');
+const { Cycle } = require('../schema');
 
 const router = express.Router();
 
-router.get('/', (_req, res) => {
-  res.status(200).send('Welcome to Cycle-On');
-});
-
-router.post('/register', async (req, res) => {
-  const { cycleId, lat, long } = req.body;
-
+router.get('/', async (req, res) => {
+  console.log(req.user);
   try {
-    await redisHelper.setKey(`${cycleId}_status`, CYCLE_STATUS.AVAILABLE);
-    await redisHelper.setKey(`${cycleId}_lock`, LOCK_STATUS.LOCKED);
-    await redisHelper.setKey(`${cycleId}_lat`, lat);
-    await redisHelper.setKey(`${cycleId}_long`, long);
+    const availableCycles = await Cycle.find({ cycle_status: CYCLE_STATUS.AVAILABLE });
+    res.status(200).json(availableCycles);
   } catch (error) {
-    res.status(500).send(error.toString());
-    return;
-  }
-  res.status(200).send('Registered Successfully');
-});
-
-router.get('/:cycleId', async (req, res) => {
-  const { cycleId } = req.params;
-
-  try {
-    const cycleStatus = await redisHelper.getKey(`${cycleId}_status`);
-    const cycleLockStatus = await redisHelper.getKey(`${cycleId}_lock`);
-    const cycleLat = await redisHelper.getKey(`${cycleId}_lat`);
-    const cycleLong = await redisHelper.getKey(`${cycleId}_long`);
-
-    res.status(200).json({ cycleStatus, cycleLockStatus, cycleLat, cycleLong });
-  } catch (error) {
-    res.status(500).send(error.toString());
+    res.status(500).json({
+      type: 'error',
+      error: 'Unable to fetch available cycles',
+      message: error.message
+    });
   }
 });
 
-router.put('/:cycleId/unlock', async (req, res) => {
-  const { cycleId } = req.params;
+// router.put('/:cycleId/unlock', async (req, res) => {
+//   const { cycleId } = req.params;
 
-  try {
-    await redisHelper.setKey(`${cycleId}_status`, CYCLE_STATUS.BOOKED);
-    await redisHelper.setKey(`${cycleId}_lock`, LOCK_STATUS.UNLOCKED);
-    res.status(200).send('OK');
-  } catch (error) {
-    res.status(500).send(error.toString);
-  }
-});
+//   try {
+//     await redisHelper.setKey(`${cycleId}_status`, CYCLE_STATUS.BOOKED);
+//     await redisHelper.setKey(`${cycleId}_lock`, LOCK_STATUS.UNLOCKED);
+//     res.status(200).send('OK');
+//   } catch (error) {
+//     res.status(500).send(error.toString);
+//   }
+// });
 
-router.put('/:cycleId/lock', async (req, res) => {
-  const { cycleId } = req.params;
+// router.put('/:cycleId/lock', async (req, res) => {
+//   const { cycleId } = req.params;
 
-  try {
-    await redisHelper.setKey(`${cycleId}_status`, CYCLE_STATUS.AVAILABLE);
-    await redisHelper.setKey(`${cycleId}_lock`, LOCK_STATUS.LOCKED);
-    res.status(200).send('OK');
-  } catch (error) {
-    res.status(500).send(error.toString);
-  }
-});
+//   try {
+//     await redisHelper.setKey(`${cycleId}_status`, CYCLE_STATUS.AVAILABLE);
+//     await redisHelper.setKey(`${cycleId}_lock`, LOCK_STATUS.LOCKED);
+//     res.status(200).send('OK');
+//   } catch (error) {
+//     res.status(500).send(error.toString);
+//   }
+// });
 
 module.exports = router;

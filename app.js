@@ -7,8 +7,10 @@ const mongoose = require('mongoose');
 
 const cycleRouter = require('./routes/cycle');
 const authRouter = require('./routes/auth');
+const adminRouter = require('./routes/admin');
 
 const CONFIG = require('./helpers/config');
+const { checkToken } = require('./helpers/jwt');
 
 const app = express();
 
@@ -24,8 +26,10 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-app.use('/cycle', cycleRouter);
+app.use('/admin', adminRouter);
 app.use('/auth', authRouter);
+app.use(checkToken);
+app.use('/cycles', cycleRouter);
 
 // catch 404 and forward to error handler
 app.use((_req, _res, next) => {
