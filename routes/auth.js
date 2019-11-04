@@ -56,7 +56,7 @@ router.post('/verify', async (req, res) => {
   const { phone, otp } = req.body;
 
   try {
-    const user = await User.findOne({ phone });
+    const user = await User.findOne({ phone }, '_id name phone');
     if (user) {
       const otpResponse = await verifyOTP(phone, otp);
 

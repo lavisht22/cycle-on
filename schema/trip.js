@@ -5,11 +5,13 @@ const { Schema } = mongoose;
 module.exports = new Schema({
   user: {
     type: mongoose.Schema.Types.ObjectId,
-    required: true
+    required: true,
+    ref: 'User'
   },
   cycle: {
     type: mongoose.Schema.Types.ObjectId,
-    required: true
+    required: true,
+    ref: 'Cycle'
   },
   start: {
     type: Date,

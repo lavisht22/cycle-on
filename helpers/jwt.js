@@ -3,7 +3,7 @@ const { JWT_SECRET } = require('./config.js');
 
 const checkToken = (req, res, next) => {
   let token = req.headers['x-access-token'] || req.headers.authorization; // Express headers are auto converted to lowercase
-  if (token.startsWith('Bearer ')) {
+  if (token && token.startsWith('Bearer ')) {
     // Remove Bearer from string
     token = token.slice(7, token.length);
   }
@@ -13,6 +13,7 @@ const checkToken = (req, res, next) => {
       if (err) {
         return res.status(401).json({
           type: 'error',
+          error: 'Authorization Failed',
           message: 'Token is not valid'
         });
       }
@@ -21,7 +22,8 @@ const checkToken = (req, res, next) => {
     });
   } else {
     return res.json({
-      success: false,
+      type: 'error',
+      error: 'Authorization Failed',
       message: 'Auth token is not supplied'
     });
   }

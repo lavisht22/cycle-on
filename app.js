@@ -8,6 +8,8 @@ const mongoose = require('mongoose');
 const cycleRouter = require('./routes/cycle');
 const authRouter = require('./routes/auth');
 const adminRouter = require('./routes/admin');
+const tripRouter = require('./routes/trip');
+const profileRouter = require('./routes/profile');
 
 const CONFIG = require('./helpers/config');
 const { checkToken } = require('./helpers/jwt');
@@ -30,6 +32,8 @@ app.use('/admin', adminRouter);
 app.use('/auth', authRouter);
 app.use(checkToken);
 app.use('/cycles', cycleRouter);
+app.use('/trips', tripRouter);
+app.use('/profile', profileRouter);
 
 // catch 404 and forward to error handler
 app.use((_req, _res, next) => {

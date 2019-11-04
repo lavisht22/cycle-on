@@ -1,8 +1,7 @@
-/* eslint-disable no-underscore-dangle */
 const express = require('express');
 const { CYCLE_STATUS } = require('../helpers/constants');
 const { setKey } = require('../helpers/redis');
-const { Cycle, Trip } = require('../schema');
+const { Cycle, Trip, User } = require('../schema');
 
 const router = express.Router();
 
@@ -25,31 +24,34 @@ router.post('/book', async (req, res) => {
 
   try {
     const activeTrip = await Trip.findOne({ user: user._id, ended: false });
-
     if (activeTrip) {
       throw new Error('A trip is already active');
     }
 
+    const curUser = await User.findById(user._id);
+    if (curUser.credits < 100) {
+      throw new Error('You must have minimum ₹100 before making a booking');
+    }
+
+    const cycle = await Cycle.findOne({ cycle_id: cycleId });
+    if (!cycle) {
+      throw new Error('Cycle does not exist.');
+    }
+
     if (Number.isFinite(duration) && Number.isInteger(duration) && duration >= 1 && duration <= 4) {
-      const cycle = await Cycle.findOne({ cycle_id: cycleId });
+      const trip = new Trip({
+        user: user._id,
+        cycle: cycle._id,
+        start: Date.now(),
+        fare: 10 * duration
+      });
 
-      if (!cycle) {
-        throw new Error('Cycle does not exist.');
-      } else {
-        const trip = new Trip({
-          user: user._id,
-          cycle: cycle._id,
-          start: Date.now(),
-          fare: 10 * duration
-        });
+      await trip.save();
+      cycle.cycle_status = CYCLE_STATUS.BOOKED;
+      await cycle.save();
+      await setKey(`${cycle.cycle_id}_status`, CYCLE_STATUS.BOOKED);
 
-        await trip.save();
-        cycle.cycle_status = CYCLE_STATUS.BOOKED;
-        await cycle.save();
-        await setKey(`${cycle.cycle_id}_status`, CYCLE_STATUS.BOOKED);
-
-        res.status(200).json(trip);
-      }
+      res.status(200).json(trip);
     } else {
       throw new Error('Invalid Duration');
     }
