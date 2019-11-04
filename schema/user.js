@@ -22,5 +22,10 @@ module.exports = new Schema({
     type: Number,
     required: true,
     default: 0
+  },
+  verified: {
+    type: Boolean,
+    default: false,
+    required: true
   }
 });

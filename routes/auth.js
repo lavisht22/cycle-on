@@ -1,46 +1,81 @@
 const express = require('express');
+const jwt = require('jsonwebtoken');
 
 const { User } = require('../schema');
+const { sendOTP, verifyOTP } = require('../helpers/sms');
+const { JWT_SECRET } = require('../helpers/config');
 
 const router = express.Router();
 
 router.post('/signup', async (req, res) => {
   const { name, phone } = req.body;
 
-  const newUser = new User({
-    name,
-    phone
-  });
-
-  let savedUser;
-
   try {
-    savedUser = await newUser.save();
+    // Check if user already exists
+    if (await User.findOne({ phone })) {
+      throw new Error('User already exists');
+    }
+
+    const otpResponse = await sendOTP(phone);
+
+    const newUser = new User({
+      name,
+      phone
+    });
+
+    await newUser.save();
+
+    res.status(200).json(otpResponse);
   } catch (error) {
     res.status(500).send({
-      error: 'User Creation Failed',
+      error: 'Signup Failed',
       msg: error.message
     });
   }
-
-  res.status(200).json(savedUser);
 });
 
 router.post('/login', async (req, res) => {
   const { phone } = req.body;
+
+  try {
+    if (await User.findOne({ phone })) {
+      const otpResponse = await sendOTP(phone);
+      res.status(200).json(otpResponse);
+    } else {
+      throw new Error('User does not exist');
+    }
+  } catch (error) {
+    res.status(500).send({
+      error: 'Login Failed',
+      msg: error.message
+    });
+  }
+});
+
+router.post('/verify', async (req, res) => {
+  const { phone, otp } = req.body;
+
   try {
     const user = await User.findOne({ phone });
-    if (!user) {
-      res.status(404).json({
-        error: 'User does not exsist',
-        msg: ''
-      });
+    if (user) {
+      const otpResponse = await verifyOTP(phone, otp);
+
+      if (otpResponse.type === 'success') {
+        const token = jwt.sign(user.toJSON(), JWT_SECRET, {
+          expiresIn: '30d'
+        });
+        res.status(200).json({
+          type: 'success',
+          token
+        });
+      }
+    } else {
+      throw new Error('User does not exist');
     }
-    res.status(200).json(user);
   } catch (error) {
-    res.status(500).json({
-      error: 'Unable to Login',
-      msg: error.toString()
+    res.status(500).send({
+      error: 'Verification Failed',
+      msg: error.message
     });
   }
 });

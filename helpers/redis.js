@@ -1,9 +1,11 @@
 const redis = require('redis');
 const bluebird = require('bluebird');
 
+const CONFIG = require('./config');
+
 bluebird.promisifyAll(redis);
 
-const client = redis.createClient(process.env.REDIS_URL);
+const client = redis.createClient(CONFIG.REDIS_URL);
 
 const setKey = (key, value) => {
   return client.setAsync(key, value);

@@ -67,9 +67,10 @@ int pos = 0;
 String cycleId = "test";
 
 void setup() {
+  SerialMon.println("Reached Setup");
   prevLocked = true;
   myservo.attach(motorPin);
-  myservo.write(50);
+  myservo.write(30);
   // Set console baud rate
   SerialMon.begin(9600);
   delay(10);
@@ -206,9 +207,9 @@ void updateData() {
 }
 
 void lockMotor() {
-  myservo.write(50);
+  myservo.write(30);
 }
 
 void unlockMotor() {
-  myservo.write(100);
+  myservo.write(80);
 }

@@ -8,10 +8,12 @@ const mongoose = require('mongoose');
 const cycleRouter = require('./routes/cycle');
 const authRouter = require('./routes/auth');
 
+const CONFIG = require('./helpers/config');
+
 const app = express();
 
 // Connect to Mongoose Database
-mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true });
+mongoose.connect(CONFIG.MONGODB_URI, { useNewUrlParser: true });
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
