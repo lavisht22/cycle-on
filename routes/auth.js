@@ -68,6 +68,8 @@ router.post('/verify', async (req, res) => {
           type: 'success',
           token
         });
+      } else {
+        throw new Error('OTP Verification Failed');
       }
     } else {
       throw new Error('User does not exist');
