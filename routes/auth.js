@@ -27,7 +27,7 @@ router.post('/signup', async (req, res) => {
 
     res.status(200).json(otpResponse);
   } catch (error) {
-    res.status(400).send({
+    res.status(400).json({
       error: 'Signup Failed',
       msg: error.message
     });
@@ -45,7 +45,7 @@ router.post('/login', async (req, res) => {
       throw new Error('User does not exist');
     }
   } catch (error) {
-    res.status(400).send({
+    res.status(400).json({
       error: 'Login Failed',
       msg: error.message
     });
@@ -73,7 +73,7 @@ router.post('/verify', async (req, res) => {
       throw new Error('User does not exist');
     }
   } catch (error) {
-    res.status(400).send({
+    res.status(400).json({
       error: 'Verification Failed',
       msg: error.message
     });
