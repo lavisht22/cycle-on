@@ -1,6 +1,6 @@
 const express = require('express');
 const { CYCLE_STATUS } = require('../helpers/constants');
-const { setKey } = require('../helpers/redis');
+const { setKey, getKey } = require('../helpers/redis');
 const { Cycle, Trip, User } = require('../schema');
 
 const router = express.Router();
@@ -8,7 +8,25 @@ const router = express.Router();
 router.get('/', async (req, res) => {
   try {
     const availableCycles = await Cycle.find({ cycle_status: CYCLE_STATUS.AVAILABLE });
-    res.status(200).json(availableCycles);
+    const cycles = await Promise.all(
+      availableCycles.map(cycle => {
+        return new Promise(async resolve => {
+          const { cycle_id } = cycle;
+          const long = await getKey(`${cycle_id}_long`);
+          const lat = await getKey(`${cycle_id}_lat`);
+          resolve({
+            ...cycle._doc,
+            coord: {
+              long,
+              lat
+            }
+          });
+        });
+        // await getKey(`${cycleId}_status`);
+        // await getKey(`${cycleId}_lock`);
+      })
+    );
+    res.status(200).json(cycles);
   } catch (error) {
     res.status(500).json({
       type: 'error',
