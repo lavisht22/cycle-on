@@ -12,13 +12,13 @@ router.get('/', async (req, res) => {
       availableCycles.map(cycle => {
         return new Promise(async resolve => {
           const { cycle_id } = cycle;
-          const long = await getKey(`${cycle_id}_long`);
-          const lat = await getKey(`${cycle_id}_lat`);
+          const longitude = await getKey(`${cycle_id}_long`);
+          const latitude = await getKey(`${cycle_id}_lat`);
           resolve({
             ...cycle._doc,
             coord: {
-              long,
-              lat
+              longitude,
+              latitude
             }
           });
         });
