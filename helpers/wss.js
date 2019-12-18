@@ -26,8 +26,8 @@ const createWebSocketServer = server => {
         try {
           await redisHelper.setKey(`${cycleId}_status`, CYCLE_STATUS.AVAILABLE);
           await redisHelper.setKey(`${cycleId}_lock`, LOCK_STATUS.LOCKED);
-          await redisHelper.setKey(`${cycleId}_long`, long);
-          await redisHelper.setKey(`${cycleId}_lat`, lat);
+          // await redisHelper.setKey(`${cycleId}_long`, long);
+          // await redisHelper.setKey(`${cycleId}_lat`, lat);
           ws.send('Data Saved!');
         } catch (error) {
           ws.send('Error! Unable to process settings on server.');
@@ -36,8 +36,8 @@ const createWebSocketServer = server => {
 
       if (commandType === 'update') {
         try {
-          await redisHelper.setKey(`${cycleId}_long`, long);
-          await redisHelper.setKey(`${cycleId}_lat`, lat);
+          // await redisHelper.setKey(`${cycleId}_long`, long);
+          // await redisHelper.setKey(`${cycleId}_lat`, lat);
           const cycleStatus = await redisHelper.getKey(`${cycleId}_status`);
           const cycleLockStatus = await redisHelper.getKey(`${cycleId}_lock`);
 

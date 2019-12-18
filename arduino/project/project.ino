@@ -67,12 +67,12 @@ int pos = 0;
 String cycleId = "test";
 
 void setup() {
-  SerialMon.println("Reached Setup");
   prevLocked = true;
   myservo.attach(motorPin);
   myservo.write(30);
   // Set console baud rate
   SerialMon.begin(9600);
+  SerialMon.print(F("Reached Setup..."));
   delay(10);
   ss.begin(GPSBaud);
 
